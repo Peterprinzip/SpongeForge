@@ -108,6 +108,7 @@ import org.spongepowered.mod.plugin.SpongeModPluginContainer;
 import org.spongepowered.mod.registry.SpongeForgeModuleRegistry;
 import org.spongepowered.mod.registry.SpongeForgeVillagerRegistry;
 import org.spongepowered.mod.registry.SpongeGameData;
+import org.spongepowered.mod.service.permission.SpongePermissionHandler;
 import org.spongepowered.mod.service.world.SpongeChunkTicketManager;
 
 import java.io.File;
@@ -226,6 +227,7 @@ public class SpongeMod extends MetaModContainer {
             registerService(ChunkTicketManager.class, new SpongeChunkTicketManager());
             SpongeBootstrap.initializeServices();
             SpongeBootstrap.initializeCommands();
+            SpongePermissionHandler.INSTANCE.adopt();
             SpongeImpl.getRegistry().preInit();
             SpongeModMessageHandler.init();
 
@@ -274,6 +276,10 @@ public class SpongeMod extends MetaModContainer {
 
     @Subscribe
     public void onInitialization(FMLInitializationEvent event) {
+        if (SpongeImpl.getGlobalConfig().getConfig().getCommands().shouldForcePermissionHandler()) {
+            SpongePermissionHandler.INSTANCE.forceAdoption();
+        }
+
         try {
             SpongeImpl.getRegistry().init();
             if (!this.game.getServiceManager().provide(PermissionService.class).isPresent()) {
