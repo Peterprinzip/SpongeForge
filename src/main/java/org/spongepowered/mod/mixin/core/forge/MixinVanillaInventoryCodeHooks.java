@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
@@ -58,7 +59,7 @@ public class MixinVanillaInventoryCodeHooks {
             Object destination, int i, ItemStack originalSlotContents,
             ItemStack insertStack, ItemStack remainder) {
         // after putStackInInventoryAllSlots
-        remainder = InventoryUtil.handleTransferPost(hopper, i, originalSlotContents, destination, remainder);
+        remainder = SpongeCommonEventFactory.callTransferPost(hopper, i, originalSlotContents, destination, remainder);
     }
 
     @Shadow private static ItemStack insertStack(TileEntity source, Object destination, IItemHandler destInventory, ItemStack stack, int slot) {
@@ -77,20 +78,20 @@ public class MixinVanillaInventoryCodeHooks {
         if (destination instanceof TileEntityChest) {
             adapter = ((InventoryAdapter) InventoryUtil.getDoubleChestInventory(((TileEntityChest) destination)).orElse(adapter));
         }
-        return InventoryUtil
+        return SpongeCommonEventFactory
                 .captureInsertRemote(((IInventory) source), adapter, slot, () -> insertStack(source, destination, destInventory, stack, slot));
     }
 
     @Inject(method = "insertHook", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE", target = "Lnet/minecraftforge/items/VanillaInventoryCodeHooks;isFull(Lnet/minecraftforge/items/IItemHandler;)Z"))
     private static void onTransferItemsOut(TileEntityHopper hopper, CallbackInfoReturnable<Boolean> cir, EnumFacing hopperFacing, Pair<IItemHandler, Object> destinationResult, IItemHandler itemHandler, Object destination) {
-        if (InventoryUtil.handleTransferPre(hopper, destination).isCancelled()) {
+        if (SpongeCommonEventFactory.callTransferPre(hopper, destination).isCancelled()) {
             cir.setReturnValue(false);
         }
     }
 
     @Inject(method = "dropperInsertHook", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;copy()Lnet/minecraft/item/ItemStack;", ordinal = 0))
     private static void onDispense(World world, BlockPos pos, TileEntityDispenser dropper, int slot, ItemStack stack, CallbackInfoReturnable<Boolean> cir, EnumFacing enumFacing, BlockPos blockPos, Pair<IItemHandler, Object> destinationResult, IItemHandler itemHandler, Object destination) {
-        if (InventoryUtil.handleTransferPre(dropper, destination).isCancelled()) {
+        if (SpongeCommonEventFactory.callTransferPre(dropper, destination).isCancelled()) {
             cir.setReturnValue(false);
         }
     }
@@ -100,6 +101,6 @@ public class MixinVanillaInventoryCodeHooks {
             EnumFacing enumFacing, BlockPos blockPos, Pair<IItemHandler, Object> destinationResult, IItemHandler itemHandler,
             Object destination, ItemStack dispensedStack, ItemStack remainder) {
         // after setInventorySlotContents if return false
-        InventoryUtil.handleTransferPost(dropper, slot, stack, destination, remainder);
+        SpongeCommonEventFactory.callTransferPost(dropper, slot, stack, destination, remainder);
     }
 }
