@@ -61,6 +61,7 @@
         "item.MixinItemShears",
         "item.MixinItemStack",
         "item.MixinItemLilyPad",
+        "item.inventory.MixinItemStackHandler",
         "item.recipe.MixinSpongeRecipe",
         "item.recipe.MixiSpongeCraftingRecipeRegistry",
         "nbt.MixinNBTTagCompound",
