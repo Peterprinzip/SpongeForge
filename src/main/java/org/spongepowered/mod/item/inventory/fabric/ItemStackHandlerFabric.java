@@ -1,9 +1,7 @@
 package org.spongepowered.mod.item.inventory.fabric;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
@@ -35,8 +33,7 @@ public class ItemStackHandlerFabric implements Fabric<ItemStackHandler> {
 
     @Override
     public void setStack(int index, ItemStack stack) {
-        // TODO reject
-        // TODO returnvalue
+        IItemHandlerFabric.setIItemHandlerStack(this.inventory, index, stack);
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLe
 public class IItemHandlerAdapter extends Adapter {
 
     public IItemHandlerAdapter(IItemHandler handler) {
-        super(((Fabric) new IItemHandlerFabric(handler)));
+        super(((Fabric) new IItemHandlerFabric(handler)), null);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class IItemHandlerAdapter extends Adapter {
     }
 
     @Override
-    protected SlotCollection initSlots(Fabric<IInventory> inventory, Lens<IInventory, ItemStack> root, Inventory parent) {
+    protected SlotCollection initSlots(Fabric<IInventory> inventory, Inventory parent) {
         return new SlotCollection(inventory.getSize());
     }
 }
