@@ -47,7 +47,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
-import org.spongepowered.mod.item.inventory.fabric.IItemHandlerAdapter;
 
 @Mixin(VanillaInventoryCodeHooks.class)
 public class MixinVanillaInventoryCodeHooks {
@@ -69,17 +68,16 @@ public class MixinVanillaInventoryCodeHooks {
 
     @Redirect(method = "putStackInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/items/VanillaInventoryCodeHooks;insertStack(Lnet/minecraft/tileentity/TileEntity;Ljava/lang/Object;Lnet/minecraftforge/items/IItemHandler;Lnet/minecraft/item/ItemStack;I)Lnet/minecraft/item/ItemStack;"))
     private static ItemStack onInsertStack(TileEntity source, Object destination, IItemHandler destInventory, ItemStack stack, int slot) {
-        InventoryAdapter adapter;
-        // find adapter
+
         if (!(destination instanceof InventoryAdapter && source instanceof IMixinInventory)) {
-            adapter = new IItemHandlerAdapter(destInventory); // TODO source may not be a IMixinSource
-        } else {
-            adapter = ((InventoryAdapter) destination);
+            return insertStack(source, destination, destInventory, stack, slot);
         }
 
+        InventoryAdapter adapter = ((InventoryAdapter) destination);
         if (destination instanceof TileEntityChest) {
             adapter = ((InventoryAdapter) InventoryUtil.getDoubleChestInventory(((TileEntityChest) destination)).orElse(adapter));
         }
+
         return SpongeCommonEventFactory.captureInsertRemote(((IInventory) source), adapter, slot, () -> insertStack(source, destination, destInventory, stack, slot));
     }
 

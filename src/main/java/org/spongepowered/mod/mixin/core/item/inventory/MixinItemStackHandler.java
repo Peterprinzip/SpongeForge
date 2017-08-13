@@ -7,6 +7,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -28,7 +30,7 @@ import java.util.List;
 
 @Mixin(ItemStackHandler.class)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
-public abstract class MixinItemStackHandler implements MinecraftInventoryAdapter {
+public abstract class MixinItemStackHandler implements MinecraftInventoryAdapter, IMixinInventory {
 
     protected EmptyInventory empty;
     protected Inventory parent;
@@ -38,6 +40,8 @@ public abstract class MixinItemStackHandler implements MinecraftInventoryAdapter
     protected Iterable<Slot> slotIterator;
     private Fabric<ItemStackHandler> fabric;
     protected Lens<IInventory, ItemStack> lens = null;
+
+    public List<SlotTransaction> capturedTransactions = new ArrayList<>();
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstructed(CallbackInfo ci) {
@@ -114,6 +118,11 @@ public abstract class MixinItemStackHandler implements MinecraftInventoryAdapter
 
     public Fabric<IInventory> getInventory() {
         return ((Fabric) this.fabric);
+    }
+
+    @Override
+    public List<SlotTransaction> getCapturedTransactions() {
+        return this.capturedTransactions;
     }
 
 
